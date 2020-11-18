@@ -32,6 +32,10 @@ export class RecipeService {
     return this.recipes.slice(); // return a duplicate not the pointer
   }
 
+  getRecipe(index: number): Recipe {
+    return this.recipes.slice()[index];
+  }
+
   addIngredientsToShoppingList(ingredients: Ingredient[]): void {
     this.shoppingListService.addIngredients(ingredients);
   }
