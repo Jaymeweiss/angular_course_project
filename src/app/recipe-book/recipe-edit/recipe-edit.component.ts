@@ -62,5 +62,12 @@ export class RecipeEditComponent implements OnInit {
     });
   }
 
-  // *ngFor="let ingredientCtrl of controls; let i = index"
+  onAddIngredient(): void {
+    (this.recipeForm.get('ingredients') as FormArray).push(
+      new FormGroup({
+        name: new FormControl(),
+        amount: new FormControl()
+      })
+    );
+  }
 }
