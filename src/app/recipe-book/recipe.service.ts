@@ -3,6 +3,7 @@ import {Recipe} from './recipe.model';
 import {Ingredient} from '../shared/ingredient.model';
 import {ShoppingListService} from '../shopping-list/shopping-list.service';
 import {Subject} from 'rxjs';
+import {HttpClient} from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +30,7 @@ export class RecipeService {
     )
   ];
 
-  constructor(private shoppingListService: ShoppingListService) {
+  constructor(private shoppingListService: ShoppingListService, private httpClient: HttpClient) {
   }
 
   getRecipes(): Recipe[] {
@@ -57,5 +58,14 @@ export class RecipeService {
   deleteRecipe(index: number): void {
     this.recipes.splice(index, 1);
     this.recipesChanged.next(this.recipes.slice());
+  }
+
+  storeRecipes(): void {
+    // put to overwrite all values with Firebase
+    // put also does not add an id - post does this
+    this.httpClient.put('https://ng-complete-guide-c9a62-default-rtdb.firebaseio.com/recipes.json', this.recipes)
+      .subscribe(response => {
+        console.log(response);
+      });
   }
 }
