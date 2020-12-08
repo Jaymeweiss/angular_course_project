@@ -11,24 +11,7 @@ import {HttpClient} from '@angular/common/http';
 export class RecipeService {
   recipesChanged = new Subject<Recipe[]>();
 
-  private recipes: Recipe[] = [
-    new Recipe('Tasty Pasta',
-      'Tasty Pasta with a creamy sauce',
-      'https://food.fnr.sndimg.com/content/dam/images/food/fullset/2018/9/26/0/FNK_Tuscan-Chicken-Skillet_H2_s4x3.jpg.rend.hgtvcom.616.462.suffix/1537973085542.jpeg',
-      [
-        new Ingredient('pasta', 1),
-        new Ingredient('basil', 2)
-      ]
-    ),
-    new Recipe('Burger',
-      'A great tasting burger',
-      'https://food.fnr.sndimg.com/content/dam/images/food/fullset/2018/9/26/0/FNK_Tuscan-Chicken-Skillet_H2_s4x3.jpg.rend.hgtvcom.616.462.suffix/1537973085542.jpeg',
-      [
-        new Ingredient('Bun', 2),
-        new Ingredient('Meat', 1)
-      ]
-    )
-  ];
+  private recipes: Recipe[] = [];
 
   constructor(private shoppingListService: ShoppingListService, private httpClient: HttpClient) {
   }
@@ -66,6 +49,14 @@ export class RecipeService {
     this.httpClient.put('https://ng-complete-guide-c9a62-default-rtdb.firebaseio.com/recipes.json', this.recipes)
       .subscribe(response => {
         console.log(response);
+      });
+  }
+
+  fetchRecipes(): void {
+    this.httpClient.get<Recipe[]>('https://ng-complete-guide-c9a62-default-rtdb.firebaseio.com/recipes.json')
+      .subscribe(recipes => {
+        this.recipes = recipes;
+        this.recipesChanged.next(this.recipes.slice());
       });
   }
 }
