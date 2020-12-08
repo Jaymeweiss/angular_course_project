@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {NgForm} from '@angular/forms';
+import {AuthService} from './auth.service';
 
 @Component({
   selector: 'app-auth',
@@ -8,8 +9,9 @@ import {NgForm} from '@angular/forms';
 })
 export class AuthComponent implements OnInit {
   isLoginMode = true;
+  error: string = null;
 
-  constructor() {
+  constructor(private authService: AuthService) {
   }
 
   ngOnInit(): void {
@@ -20,6 +22,22 @@ export class AuthComponent implements OnInit {
   }
 
   onSubmit(form: NgForm): void {
+    if (!form.valid) {
+      return;
+    }
+    if (this.isLoginMode) {
+
+    } else {
+      this.authService.signUp(form.value.email, form.value.password).subscribe(
+        responseData => {
+          console.log(responseData);
+        },
+        errorResponse => {
+          console.log(errorResponse);
+          this.error = 'An error occurred';
+        });
+    }
+
     form.reset();
   }
 }
