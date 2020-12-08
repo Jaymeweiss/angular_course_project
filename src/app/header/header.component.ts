@@ -20,6 +20,6 @@ export class HeaderComponent implements OnInit {
   }
 
   onFetchData(): void {
-    this.recipeService.fetchRecipes();
+    this.recipeService.fetchRecipes().subscribe();
   }
 }

@@ -2,9 +2,9 @@ import {Injectable} from '@angular/core';
 import {Recipe} from './recipe.model';
 import {Ingredient} from '../shared/ingredient.model';
 import {ShoppingListService} from '../shopping-list/shopping-list.service';
-import {Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
-import {map} from 'rxjs/operators';
+import {map, tap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -53,17 +53,16 @@ export class RecipeService {
       });
   }
 
-  fetchRecipes(): void {
-    this.httpClient.get<Recipe[]>('https://ng-complete-guide-c9a62-default-rtdb.firebaseio.com/recipes.json')
+  fetchRecipes(): Observable<Recipe[]> {
+    return this.httpClient.get<Recipe[]>('https://ng-complete-guide-c9a62-default-rtdb.firebaseio.com/recipes.json')
       .pipe(map(recipes => {
         // ensure that the recipe at least has an empty array of ingredients not null
         return recipes.map(recipe => {
           return {...recipe, ingredients: recipe.ingredients ? recipe.ingredients : []};
         });
-      }))
-      .subscribe(recipes => {
+      }), tap(recipes => {
         this.recipes = recipes;
         this.recipesChanged.next(this.recipes.slice());
-      });
+      }));
   }
 }

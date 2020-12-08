@@ -6,6 +6,7 @@ import {ShoppingListComponent} from '../shopping-list/shopping-list.component';
 import {RecipeDetailComponent} from '../recipe-book/recipe-detail/recipe-detail.component';
 import {RecipeStartComponent} from '../recipe-book/recipe-start/recipe-start.component';
 import {RecipeEditComponent} from '../recipe-book/recipe-edit/recipe-edit.component';
+import {RecipesResolverService} from '../recipe-book/recipes-resolver.service';
 
 
 const appRoutes: Routes = [
@@ -14,8 +15,8 @@ const appRoutes: Routes = [
     path: 'recipes', component: RecipeBookComponent, children: [
       {path: '', component: RecipeStartComponent},
       {path: 'new', component: RecipeEditComponent}, // this needs to be on top - or its interpreted as an id
-      {path: ':id', component: RecipeDetailComponent},
-      {path: ':id/edit', component: RecipeEditComponent}
+      {path: ':id', component: RecipeDetailComponent, resolve: [RecipesResolverService]},
+      {path: ':id/edit', component: RecipeEditComponent, resolve: [RecipesResolverService]}
     ]
   },
   {path: 'shopping-list', component: ShoppingListComponent}
