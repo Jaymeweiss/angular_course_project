@@ -1,7 +1,8 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {Observable, throwError} from 'rxjs';
-import {catchError} from 'rxjs/operators';
+import {Observable, Subject, throwError} from 'rxjs';
+import {catchError, tap} from 'rxjs/operators';
+import {User} from './user.model';
 
 export interface AuthResponseData {
   idToken: string;
@@ -16,6 +17,7 @@ export interface AuthResponseData {
   providedIn: 'root'
 })
 export class AuthService {
+  user = new Subject<User>();
 
   constructor(private httpClient: HttpClient) {
   }
@@ -53,7 +55,14 @@ export class AuthService {
         email,
         password,
         returnSecureToken: true
-      }).pipe(catchError(AuthService.handleErrorResponse));
+      }).pipe(catchError(AuthService.handleErrorResponse), tap(responseData => {
+      this.handleAuthentication(
+        responseData.email,
+        responseData.localId,
+        responseData.idToken,
+        +responseData.expiresIn,
+        responseData.refreshToken);
+    }));
   }
 
   logIn(email: string, password: string): Observable<AuthResponseData> {
@@ -62,6 +71,26 @@ export class AuthService {
         email,
         password,
         returnSecureToken: true
-      }).pipe(catchError(AuthService.handleErrorResponse));
+      }).pipe(catchError(AuthService.handleErrorResponse), tap(responseData => {
+      this.handleAuthentication(
+        responseData.email,
+        responseData.localId,
+        responseData.idToken,
+        +responseData.expiresIn,
+        responseData.refreshToken);
+    }));
+  }
+
+  refreshToken(refreshToken: string): void {
+    this.httpClient.post('https://securetoken.googleapis.com/v1/token?key=AIzaSyBMsLy4or70g67sovfuTmunQoDvXocnjHk', {
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken
+    }).subscribe();
+  }
+
+  private handleAuthentication(email: string, id: string, token: string, expiresIn: number, refreshToken: string): void {
+    const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
+    const user = new User(email, id, token, expirationDate, refreshToken);
+    this.user.next(user);
   }
 }
