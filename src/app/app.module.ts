@@ -15,8 +15,9 @@ import {ShoppingListService} from './shopping-list/shopping-list.service';
 import {AppRoutingModule} from './app-routing/app-routing.module';
 import {RecipeStartComponent} from './recipe-book/recipe-start/recipe-start.component';
 import {RecipeEditComponent} from './recipe-book/recipe-edit/recipe-edit.component';
-import {HttpClientModule} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import { AuthComponent } from './auth/auth.component';
+import {AuthInterceptorService} from './auth/services/auth-interceptor.service';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,7 @@ import { AuthComponent } from './auth/auth.component';
     ReactiveFormsModule,
     AppRoutingModule
   ],
-  providers: [ShoppingListService],
+  providers: [ShoppingListService, {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true}],
   bootstrap: [AppComponent]
 })
 export class AppModule {

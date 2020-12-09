@@ -3,9 +3,8 @@ import {Recipe} from './recipe.model';
 import {Ingredient} from '../shared/ingredient.model';
 import {ShoppingListService} from '../shopping-list/shopping-list.service';
 import {Observable, Subject} from 'rxjs';
-import {HttpClient, HttpParams} from '@angular/common/http';
-import {exhaustMap, map, take, tap} from 'rxjs/operators';
-import {AuthService} from '../auth/auth.service';
+import {HttpClient} from '@angular/common/http';
+import {map, tap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +14,7 @@ export class RecipeService {
 
   private recipes: Recipe[] = [];
 
-  constructor(private shoppingListService: ShoppingListService, private httpClient: HttpClient, private authService: AuthService) {
+  constructor(private shoppingListService: ShoppingListService, private httpClient: HttpClient) {
   }
 
   getRecipes(): Recipe[] {
@@ -55,22 +54,18 @@ export class RecipeService {
   }
 
   fetchRecipes(): Observable<Recipe[]> {
-    return this.authService.user.pipe(
-      take(1),
-      exhaustMap(user => {
-        return this.httpClient.get<Recipe[]>('https://ng-complete-guide-c9a62-default-rtdb.firebaseio.com/recipes.json', {
-          params: new HttpParams().set('auth', user.token)
-        });
-      }),
-      map(recipes => {
-        // ensure that the recipe at least has an empty array of ingredients not null
-        return recipes.map(recipe => {
-          return {...recipe, ingredients: recipe.ingredients ? recipe.ingredients : []};
-        });
-      }),
-      tap(recipes => {
-        this.recipes = recipes;
-        this.recipesChanged.next(this.recipes.slice());
-      }));
+    return this.httpClient.get<Recipe[]>('https://ng-complete-guide-c9a62-default-rtdb.firebaseio.com/recipes.json')
+      .pipe(
+        map(recipes => {
+          // ensure that the recipe at least has an empty array of ingredients not null
+          return recipes.map(recipe => {
+            return {...recipe, ingredients: recipe.ingredients ? recipe.ingredients : []};
+          });
+        }),
+        tap(recipes => {
+          this.recipes = recipes;
+          this.recipesChanged.next(this.recipes.slice());
+        })
+      );
   }
 }
